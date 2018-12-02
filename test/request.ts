@@ -27,7 +27,7 @@ import {Query} from '../src/query.js';
 
 let promisified = false;
 const fakePfy = Object.assign({}, pfy, {
-  promisifyAll: function(Class) {
+  promisifyAll(Class) {
     if (Class.name === 'DatastoreRequest') {
       promisified = true;
     }
@@ -35,14 +35,14 @@ const fakePfy = Object.assign({}, pfy, {
 });
 
 const fakePjy = {
-  replaceProjectIdToken: function() {
+  replaceProjectIdToken() {
     return (pjyOverride || pjy.replaceProjectIdToken).apply(null, arguments);
   },
 };
 
 let v1FakeClientOverride;
 const fakeV1 = {
-  FakeClient: function() {
+  FakeClient() {
     return (v1FakeClientOverride || function() {}).apply(null, arguments);
   },
 };
@@ -154,7 +154,7 @@ describe('Request', function() {
         assert.strictEqual(config.client, 'DatastoreClient');
         assert.strictEqual(config.method, 'allocateIds');
 
-        const expectedKeys: {}[] = [];
+        const expectedKeys: Array<{}> = [];
         expectedKeys.length = ALLOCATIONS;
         expectedKeys.fill(keyProto);
 
@@ -698,7 +698,7 @@ describe('Request', function() {
       };
 
       const key = new entity.Key({namespace: 'ns', path: ['Company']});
-      request.insert({key: key, data: {}}, done);
+      request.insert({key, data: {}}, done);
     });
   });
 
@@ -850,7 +850,7 @@ describe('Request', function() {
           return array;
         });
 
-        const entities: {}[] = [];
+        const entities: Array<{}> = [];
 
         request
           .runQueryStream({})
@@ -920,7 +920,7 @@ describe('Request', function() {
           );
           startCalled = true;
           return this;
-        }
+        };
 
         sandbox.stub(FakeQuery.prototype, 'offset').callsFake(offset_ => {
           const offset = query.offsetVal - apiResponse.batch.skippedResults;
@@ -949,7 +949,7 @@ describe('Request', function() {
           return queryProto;
         });
 
-        const entities: {}[] = [];
+        const entities: Array<{}> = [];
         let info;
 
         request
@@ -997,7 +997,7 @@ describe('Request', function() {
             };
           }
 
-          callback(null, {batch: batch});
+          callback(null, {batch});
         };
 
         sandbox.stub(entity, 'queryToQueryProto').returns({});
@@ -1211,7 +1211,7 @@ describe('Request', function() {
         callback();
       };
       request.save(
-        [{key: key, data: {k: 'v'}}, {key: key, data: {k: 'v'}}],
+        [{key, data: {k: 'v'}}, {key, data: {k: 'v'}}],
         done
       );
     });
@@ -1226,7 +1226,7 @@ describe('Request', function() {
 
       request.save(
         {
-          key: key,
+          key,
           data: {},
         },
         gaxOptions,
@@ -1242,7 +1242,7 @@ describe('Request', function() {
         assert.strictEqual(obj, entityObject);
         prepared = true;
         return {
-          key: key,
+          key,
           method: 'insert',
           data: {k: 'v'},
         };
@@ -1277,9 +1277,9 @@ describe('Request', function() {
 
       request.save(
         [
-          {key: key, method: 'insert', data: {k: 'v'}},
-          {key: key, method: 'update', data: {k2: 'v2'}},
-          {key: key, method: 'upsert', data: {k3: 'v3'}},
+          {key, method: 'insert', data: {k: 'v'}},
+          {key, method: 'update', data: {k2: 'v2'}},
+          {key, method: 'upsert', data: {k3: 'v3'}},
         ],
         done
       );
@@ -1289,7 +1289,7 @@ describe('Request', function() {
       assert.throws(function() {
         request.save(
           {
-            key: key,
+            key,
             method: 'auto_insert_id',
             data: {
               k: 'v',
@@ -1303,7 +1303,7 @@ describe('Request', function() {
     it('should not alter the provided data object', function(done) {
       const entities = [
         {
-          key: key,
+          key,
           method: 'insert',
           indexed: false,
           data: {
@@ -1332,7 +1332,7 @@ describe('Request', function() {
       request.request_ = function(config, callback) {
         callback(null, mockCommitResponse);
       };
-      request.save({key: key, data: {}}, function(err, apiResponse) {
+      request.save({key, data: {}}, function(err, apiResponse) {
         assert.ifError(err);
         assert.strictEqual(mockCommitResponse, apiResponse);
         done();
@@ -1349,7 +1349,7 @@ describe('Request', function() {
 
       request.save(
         {
-          key: key,
+          key,
           data: [
             {
               name: 'name',
@@ -1375,7 +1375,7 @@ describe('Request', function() {
 
       request.save(
         {
-          key: key,
+          key,
           data: [
             {
               name: 'name',
@@ -1393,7 +1393,7 @@ describe('Request', function() {
       const incompleteKey2 = new entity.Key({path: ['Incomplete']});
       const completeKey = new entity.Key({path: ['Complete', 'Key']});
 
-      const keyProtos: {}[] = [];
+      const keyProtos: Array<{}> = [];
       const ids = [1, 2];
 
       const response = {
@@ -1450,7 +1450,7 @@ describe('Request', function() {
 
       it('should queue request & callback', function() {
         request.save({
-          key: key,
+          key,
           data: [{name: 'name', value: 'value'}],
         });
 
@@ -1498,7 +1498,7 @@ describe('Request', function() {
       };
 
       const key = new entity.Key({namespace: 'ns', path: ['Company']});
-      request.update({key: key, data: {}}, done);
+      request.update({key, data: {}}, done);
     });
   });
 
@@ -1541,7 +1541,7 @@ describe('Request', function() {
       };
 
       const key = new entity.Key({namespace: 'ns', path: ['Company']});
-      request.upsert({key: key, data: {}}, done);
+      request.upsert({key, data: {}}, done);
     });
   });
 
@@ -1564,14 +1564,14 @@ describe('Request', function() {
     beforeEach(function() {
       const clients_ = new Map();
       clients_.set(CONFIG.client, {
-        [CONFIG.method]: function() {},
+        [CONFIG.method]() {},
       });
 
       request.datastore = {
-        clients_: clients_,
+        clients_,
 
         auth: {
-          getProjectId: function(callback) {
+          getProjectId(callback) {
             callback(null, PROJECT_ID);
           },
         },
@@ -1601,7 +1601,7 @@ describe('Request', function() {
 
     it('should initiate and cache the client', function() {
       const fakeClient = {
-        [CONFIG.method]: function() {},
+        [CONFIG.method]() {},
       };
 
       v1FakeClientOverride = function(options) {
@@ -1643,7 +1643,7 @@ describe('Request', function() {
 
       request.datastore.clients_ = new Map();
       request.datastore.clients_.set(CONFIG.client, {
-        [CONFIG.method]: function(reqOpts) {
+        [CONFIG.method](reqOpts) {
           assert.strictEqual(reqOpts, replacedReqOpts);
           done();
         },
@@ -1655,7 +1655,7 @@ describe('Request', function() {
     it('should send gaxOpts', function(done) {
       request.datastore.clients_ = new Map();
       request.datastore.clients_.set(CONFIG.client, {
-        [CONFIG.method]: function(_, gaxO) {
+        [CONFIG.method](_, gaxO) {
           delete gaxO.headers;
           assert.deepStrictEqual(gaxO, CONFIG.gaxOpts);
           done();
@@ -1668,7 +1668,7 @@ describe('Request', function() {
     it('should send google-cloud-resource-prefix', function(done) {
       request.datastore.clients_ = new Map();
       request.datastore.clients_.set(CONFIG.client, {
-        [CONFIG.method]: function(_, gaxO) {
+        [CONFIG.method](_, gaxO) {
           assert.deepStrictEqual(gaxO.headers, {
             'google-cloud-resource-prefix': 'projects/' + PROJECT_ID,
           });
@@ -1683,7 +1683,7 @@ describe('Request', function() {
       it('should set the mode', function(done) {
         request.datastore.clients_ = new Map();
         request.datastore.clients_.set(CONFIG.client, {
-          commit: function(reqOpts) {
+          commit(reqOpts) {
             assert.strictEqual(reqOpts.mode, 'NON_TRANSACTIONAL');
             done();
           },
@@ -1707,7 +1707,7 @@ describe('Request', function() {
       it('should set the commit transaction info', function(done) {
         request.datastore.clients_ = new Map();
         request.datastore.clients_.set(CONFIG.client, {
-          commit: function(reqOpts) {
+          commit(reqOpts) {
             assert.strictEqual(reqOpts.mode, 'TRANSACTIONAL');
             assert.strictEqual(reqOpts.transaction, TRANSACTION_ID);
             done();
@@ -1724,7 +1724,7 @@ describe('Request', function() {
       it('should set the rollback transaction info', function(done) {
         request.datastore.clients_ = new Map();
         request.datastore.clients_.set(CONFIG.client, {
-          rollback: function(reqOpts) {
+          rollback(reqOpts) {
             assert.strictEqual(reqOpts.transaction, TRANSACTION_ID);
             done();
           },
@@ -1744,7 +1744,7 @@ describe('Request', function() {
 
         request.datastore.clients_ = new Map();
         request.datastore.clients_.set(CONFIG.client, {
-          lookup: function(reqOpts) {
+          lookup(reqOpts) {
             assert.strictEqual(reqOpts.readOptions.transaction, TRANSACTION_ID);
             done();
           },
@@ -1760,7 +1760,7 @@ describe('Request', function() {
 
         request.datastore.clients_ = new Map();
         request.datastore.clients_.set(CONFIG.client, {
-          runQuery: function(reqOpts) {
+          runQuery(reqOpts) {
             assert.strictEqual(reqOpts.readOptions.transaction, TRANSACTION_ID);
             done();
           },
